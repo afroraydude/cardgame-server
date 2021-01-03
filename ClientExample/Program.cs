@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CardGameShared.Data;
 using Newtonsoft.Json;
 using WebSocketSharp;
@@ -23,6 +24,7 @@ namespace ClientExample
             {
                 ws.OnMessage += (sender, e) =>
                 {
+                    Console.WriteLine($"Received Message:\n{e.Data}");
                     ProperMessage recvmsg = JsonConvert.DeserializeObject<ProperMessage>(e.Data);
                     if (recvmsg.messageType == MessageType.JoinAccept)
                     {
@@ -33,13 +35,55 @@ namespace ClientExample
                     }
                 };
                 ws.Connect ();
-                Player me = new Player {sessionId = null, name = RandomString(8), avatar = 1, actions = new []{-1,-1,-1,-1,-1}};
-                Player opponent;
+                Player me = new Player {sessionId = null, name = RandomString(8), avatar = 1, actions = new []{-1,-1,-1,-1,-1}, lockedIn = false};
                 ProperMessage joinMessage = new ProperMessage {messageType = MessageType.Join, messageData = JsonConvert.SerializeObject(me)};
                 ws.Send (JsonConvert.SerializeObject(joinMessage));
                 
+                var actionsText = Console.ReadLine();
+                me.actions = ActionResponse(actionsText);
+                ProperMessage playMessage = new ProperMessage {messageType = MessageType.RoundPlay, messageData = JsonConvert.SerializeObject(me)};
+                ws.Send(JsonConvert.SerializeObject(playMessage));
                 Console.ReadKey (true);
             }
+        }
+
+        private static int[] ActionResponse(string actions)
+        {
+            int[] response = new[] {-1, -1, -1, -1, -1};
+            actions = actions.ToLower();
+            Regex rgx = new Regex("[^a-z]");
+            actions = rgx.Replace(actions, "");
+            char[] actionsCR = actions.ToCharArray();
+            /*
+             * Key for actions:
+             * h: Heavy Sword H
+             * s: Sword
+             * w: Heavy Sword S
+             * x: Shield
+             */
+
+            for (int i = 0; i <= 4; i++)
+            {
+                char action = actionsCR[i];
+
+                switch (action)
+                {
+                    case 'h':
+                        response[i] = (int) ActionTypes.HeavySwordH;
+                        break;
+                    case 's':
+                        response[i] = (int) ActionTypes.Sword;
+                        break;
+                    case 'w':
+                        response[i] = (int) ActionTypes.HeavySwordS;
+                        break;
+                    case 'x':
+                        response[i] = (int) ActionTypes.Shield;
+                        break;
+                }
+            }
+
+            return response;
         }
     }
 }

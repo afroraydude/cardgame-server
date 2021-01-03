@@ -6,5 +6,6 @@
         public string name { get; set; }
         public int avatar { get; set; }
         public int[] actions { get; set; }
+        public bool lockedIn { get; set; }
     }
 }
