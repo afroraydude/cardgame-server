@@ -4,8 +4,8 @@
     {
         public string sessionId { get; set; }
         public string name { get; set; }
-        public int avatar { get; set; }
-        public int[] actions { get; set; }
+        public Avatar avatar { get; set; }
+        public ActionType[] actions { get; set; }
         public bool lockedIn { get; set; }
     }
 }

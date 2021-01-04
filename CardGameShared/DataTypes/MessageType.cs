@@ -10,6 +10,7 @@
         RoundPlayAccept,
         RoundPlayDeny,
         Leave,
+        PlayerLeave,
         OpponentInfo,
         CreateAccept,
         Create

@@ -26,5 +26,10 @@ namespace CardGameServer.WebsocketInternal
         {
             return _players;
         }
+
+        public void ResetPlayers()
+        {
+            _players.Clear();
+        }
     }
 }

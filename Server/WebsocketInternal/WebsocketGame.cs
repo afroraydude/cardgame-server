@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using CardGameShared.Data;
+using CardGameShared.Exception;
 using Newtonsoft.Json;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -19,7 +20,32 @@ namespace CardGameServer.WebsocketInternal
             _code = code;
             _game = game;
         }
-        
+
+        protected override void OnError(ErrorEventArgs e)
+        {
+            throw new CardGameServerException(ErrorCode.Unknown);
+        }
+
+        protected override void OnClose(CloseEventArgs e)
+        {
+            Console.WriteLine("User left game: " + _code);
+            List<Player> _players = _game.getPlayers();
+            Console.WriteLine("Tring to find player with session ID " + ID);
+            var thisPlayerIndex = _players.IndexOf(_players.Find(player => player.sessionId == ID));
+            if (thisPlayerIndex >= 0)
+            {
+                Console.WriteLine("User was player, removing.");
+                var player = _players[thisPlayerIndex];
+                _game.RemovePlayer(player);
+                Console.WriteLine("Current players: " + _game.getPlayers().Count);
+            }
+            else
+            {
+                Console.WriteLine("User was not player, ignoring.");
+            }
+            base.OnClose(e);
+        }
+
         protected override void OnMessage(MessageEventArgs e)
         {
             ProperMessage recmsg = JsonConvert.DeserializeObject<ProperMessage>(e.Data);
@@ -33,8 +59,10 @@ namespace CardGameServer.WebsocketInternal
                 {
                     Player player = JsonConvert.DeserializeObject<Player>(recmsg.messageData);
                     player.sessionId = ID;
-                    _players.Add(player);
-                    Console.WriteLine(_players.Count);
+                    //_players.Add(player);
+                    _game.AddPlayer(player);
+                    Console.WriteLine(_game.getPlayers().Count);
+                    Console.WriteLine(JsonConvert.SerializeObject(_game.getPlayers()));
                     ProperMessage response = new ProperMessage
                         {messageType = MessageType.JoinAccept, messageData = _code};
                     Send(JsonConvert.SerializeObject(response));
@@ -61,8 +89,9 @@ namespace CardGameServer.WebsocketInternal
                 if (VerifyRoundPlay(player))
                 {
                     player.lockedIn = true;
-                    var thisPlayerIndex = _players.IndexOf(_players.Find(player => player.sessionId == ID));
+                    var thisPlayerIndex = _players.IndexOf(_players.Find(p => p.sessionId == ID));
                     Console.WriteLine($"Index: {thisPlayerIndex}");
+                    player.sessionId = ID;
                     _players[thisPlayerIndex] = player;
                     Console.WriteLine("Accepted Player Move");
                     Console.WriteLine($"Data: {e.Data}");
@@ -76,8 +105,8 @@ namespace CardGameServer.WebsocketInternal
                     ProperMessage response = new ProperMessage { messageType = MessageType.RoundPlayDeny, messageData = null};
                     Send(JsonConvert.SerializeObject(response));
                 }
-
-                if (_players[0].lockedIn && _players[1].lockedIn)
+                
+                if (_players.Count == 2 && (_players[0].lockedIn && _players[1].lockedIn))
                 {
                     var gameRound = DetermineRound(_players[0], _players[1]);
                     Console.WriteLine(JsonConvert.SerializeObject(gameRound));
@@ -85,6 +114,7 @@ namespace CardGameServer.WebsocketInternal
                         {messageType = MessageType.RoundResult, messageData = JsonConvert.SerializeObject(gameRound)};
                     Sessions.SendTo(JsonConvert.SerializeObject(response), _players[0].sessionId);
                     Sessions.SendTo(JsonConvert.SerializeObject(response), _players[1].sessionId);
+                    ResetRound();
                 }
             }
         }
@@ -96,12 +126,12 @@ namespace CardGameServer.WebsocketInternal
                 for (int i = 0; i <= 4; i++)
                 {
                     // Verify player action choices pt 1
-                    int actionType = player.actions[i];
+                    ActionType actionType = player.actions[i];
                     if (i > 0)
                     {
-                       int prevActionType = player.actions[i - 1];
-                       if (actionType == (int) ActionTypes.HeavySwordS &&
-                           prevActionType != (int) ActionTypes.HeavySwordH)
+                       ActionType prevActionType = player.actions[i - 1];
+                       if (actionType == ActionType.HeavySwordS &&
+                           prevActionType != (int) ActionType.HeavySwordH)
                        {
                            return false;
                        }
@@ -110,9 +140,9 @@ namespace CardGameServer.WebsocketInternal
                     // Verify player action choices pt 2
                     if (i < 4)
                     {
-                        int nextActionType = player.actions[i + 1];
-                        if (actionType == (int) ActionTypes.HeavySwordH &&
-                            nextActionType != (int) ActionTypes.HeavySwordS)
+                        ActionType nextActionType = player.actions[i + 1];
+                        if (actionType == (int) ActionType.HeavySwordH &&
+                            nextActionType != ActionType.HeavySwordS)
                         {
                             return false;
                         }
@@ -121,16 +151,16 @@ namespace CardGameServer.WebsocketInternal
                     // calculate energy usage
                     switch (actionType)
                     {
-                        case (int) ActionTypes.HeavySwordH:
+                        case ActionType.HeavySwordH:
                             energy -= 0;
                             break;
-                        case (int) ActionTypes.Shield:
+                        case ActionType.Shield:
                             energy -= 1;
                             break;
-                        case (int) ActionTypes.Sword:
+                        case ActionType.Sword:
                             energy -= 2;
                             break;
-                        case (int) ActionTypes.HeavySwordS:
+                        case ActionType.HeavySwordS:
                             energy -= 2;
                             break;
                     }
@@ -142,27 +172,27 @@ namespace CardGameServer.WebsocketInternal
             
         }
 
-        private int CalcDamage(ActionTypes attackAction, ActionTypes defendAction)
+        private int CalcDamage(ActionType attackAction, ActionType defendAction)
         {
             switch (attackAction)
             {
-                case ActionTypes.Shield:
+                case ActionType.Shield:
                     return 0;
-                case ActionTypes.Sword:
-                    if (defendAction == ActionTypes.Shield)
+                case ActionType.Sword:
+                    if (defendAction == ActionType.Shield)
                         return 0;
-                    else if (defendAction == ActionTypes.HeavySwordH)
+                    else if (defendAction == ActionType.HeavySwordH)
                         return 2;
                     else
                         return 1;
-                case ActionTypes.HeavySwordS:
-                    if (defendAction == ActionTypes.Shield)
+                case ActionType.HeavySwordS:
+                    if (defendAction == ActionType.Shield)
                         return 1;
-                    else if (defendAction == ActionTypes.HeavySwordH)
+                    else if (defendAction == ActionType.HeavySwordH)
                         return 3;
                     else
                         return 2;
-                case ActionTypes.HeavySwordH:
+                case ActionType.HeavySwordH:
                     return 0;
             }
 
@@ -174,8 +204,8 @@ namespace CardGameServer.WebsocketInternal
             int p2D = 0;
             for (int i = 0; i <= 4; i++)
             {
-                p1D += CalcDamage((ActionTypes)p1.actions[i], (ActionTypes)p2.actions[i]);
-                p2D += CalcDamage((ActionTypes)p2.actions[i], (ActionTypes)p1.actions[i]);
+                p1D += CalcDamage((ActionType)p1.actions[i], (ActionType)p2.actions[i]);
+                p2D += CalcDamage((ActionType)p2.actions[i], (ActionType)p1.actions[i]);
             }
 
             int w = -1;
@@ -184,6 +214,19 @@ namespace CardGameServer.WebsocketInternal
             else w = 3;
             GameRound gameRound = new GameRound {player1 = p1, player2 = p2, player1Damnage = p1D, player2Damage = p2D, winner = w};
             return gameRound;
+        }
+
+        private void ResetRound()
+        {
+            var players = _game.getPlayers();
+            ActionType[] defaultActions = new[] {ActionType.NullAction, ActionType.NullAction, ActionType.NullAction, ActionType.NullAction, ActionType.NullAction};
+            var player1 = players[0];
+            var player2 = players[1];
+            player1.actions = defaultActions;
+            player2.actions = defaultActions;
+            _game.ResetPlayers();
+            _game.AddPlayer(player1);
+            _game.AddPlayer(player2);
         }
     }
 }

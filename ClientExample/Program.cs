@@ -35,7 +35,9 @@ namespace ClientExample
                     }
                 };
                 ws.Connect ();
-                Player me = new Player {sessionId = null, name = RandomString(8), avatar = 1, actions = new []{-1,-1,-1,-1,-1}, lockedIn = false};
+                Player me = new Player {sessionId = null, name = RandomString(8), avatar = Avatar.BaldGuy, 
+                    actions = new[] {ActionType.NullAction, ActionType.NullAction, ActionType.NullAction, 
+                        ActionType.NullAction, ActionType.NullAction}, lockedIn = false};
                 ProperMessage joinMessage = new ProperMessage {messageType = MessageType.Join, messageData = JsonConvert.SerializeObject(me)};
                 ws.Send (JsonConvert.SerializeObject(joinMessage));
                 
@@ -47,9 +49,9 @@ namespace ClientExample
             }
         }
 
-        private static int[] ActionResponse(string actions)
+        private static ActionType[] ActionResponse(string actions)
         {
-            int[] response = new[] {-1, -1, -1, -1, -1};
+            ActionType[] response = new[] {ActionType.NullAction, ActionType.NullAction, ActionType.NullAction, ActionType.NullAction, ActionType.NullAction};;
             actions = actions.ToLower();
             Regex rgx = new Regex("[^a-z]");
             actions = rgx.Replace(actions, "");
@@ -69,16 +71,16 @@ namespace ClientExample
                 switch (action)
                 {
                     case 'h':
-                        response[i] = (int) ActionTypes.HeavySwordH;
+                        response[i] = ActionType.HeavySwordH;
                         break;
                     case 's':
-                        response[i] = (int) ActionTypes.Sword;
+                        response[i] = ActionType.Sword;
                         break;
                     case 'w':
-                        response[i] = (int) ActionTypes.HeavySwordS;
+                        response[i] = ActionType.HeavySwordS;
                         break;
                     case 'x':
-                        response[i] = (int) ActionTypes.Shield;
+                        response[i] = ActionType.Shield;
                         break;
                 }
             }
