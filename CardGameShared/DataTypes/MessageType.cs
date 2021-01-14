@@ -11,6 +11,8 @@
         RoundPlayDeny,
         Leave,
         PlayerLeave,
+        GameReset,
+        ReadyForNewRound,
         OpponentInfo,
         CreateAccept,
         Create

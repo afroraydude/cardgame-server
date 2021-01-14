@@ -7,7 +7,6 @@ namespace CardGameServer
 {
     class Program
     {
-        static string url = "ws://localhost:5001";
         static void Main(string[] args)
         {
             WebsocketServerWrapper server = new WebsocketServerWrapper();

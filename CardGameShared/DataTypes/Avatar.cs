@@ -5,6 +5,8 @@
         PinkHairGirl,
         HelmetGuy,
         BlueGuy,
-        BaldGuy
+        BaldGuy,
+        TVGuy,
+        BrownHOrangeSGirl
     }
 }
