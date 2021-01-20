@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CardGameServer.WebsocketInternal;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -7,11 +8,15 @@ namespace CardGameServer
 {
     class Program
     {
-        static void Main(string[] args)
+        private async Task MainAsync(string[] args)
         {
             WebsocketServerWrapper server = new WebsocketServerWrapper();
-            Console.ReadKey();
-            server.wssv.Stop();
+            await Task.Delay(-1);
+        }
+        static void Main(string[] args)
+        {
+            Program self = new Program();
+            self.MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 }
