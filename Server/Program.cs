@@ -15,6 +15,7 @@ namespace CardGameServer
         }
         static void Main(string[] args)
         {
+            Console.WriteLine("Starting up HTTP server");
             Program self = new Program();
             self.MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
