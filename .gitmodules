@@ -1,3 +1,3 @@
-[submodule "CardGameShared/cardgame-shared"]
-	path = CardGameShared/cardgame-shared
+[submodule "Server/cardgame-shared"]
+	path = Server/cardgame-shared
 	url = https://github.com/afroraydude/cardgame-shared.git
