@@ -40,6 +40,7 @@ namespace CardGameServer.WebsocketInternal
             string id = RandomString(6);
             Game game = new Game();
             _games[id] = game;
+            _server.AddGame(id);
             return id;
         }
     }
