@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -9,6 +9,10 @@
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CardGameShared\CardGameShared.csproj" />
     </ItemGroup>
 
 </Project>
