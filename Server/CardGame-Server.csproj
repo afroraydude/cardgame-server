@@ -12,7 +12,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CardGameShared\CardGameShared.csproj" />
+      <Reference Include="cardgame_shared, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\cardgame\CardGameShared\bin\Debug\cardgame_shared.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
