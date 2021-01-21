@@ -14,7 +14,7 @@ namespace CardGameServer.WebsocketInternal
         {
             Game debugGame = new Game();
             _games = new Dictionary<string, Game>();
-            wssv = new HttpServer(5001);
+            wssv = new HttpServer(80);
             wssv.Log.Level = LogLevel.Debug;
             wssv.AddWebSocketService<WebsocketLobby> ("/lobby", () => new WebsocketLobby(this, _games));
             wssv.AddWebSocketService<WebsocketGame> ("/DebugGame", () => new WebsocketGame("DebugGame", debugGame));

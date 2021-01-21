@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardGameServer.WebsocketInternal;
-using WebSocketSharp;gi
+using WebSocketSharp;
 using WebSocketSharp.Server;
 
 namespace CardGameServer
