@@ -19,6 +19,24 @@ namespace CardGameServer.WebsocketInternal
         {
             _code = code;
             _game = game;
+
+            if (code == "000000")
+            {
+                Player decoy = new Player
+                {
+                    actions = new[]
+                    {
+                        ActionType.Shield, ActionType.Shield, ActionType.Sword, ActionType.HeavySwordH,
+                        ActionType.HeavySwordS
+                    },
+                    name = "Me",
+                    avatar = Avatar.TVGuy,
+                    lockedIn = true,
+                    sessionId = "testuser1"
+                };
+                
+                _game.AddPlayer(decoy);
+            }
         }
 
         protected override void OnError(ErrorEventArgs e)
@@ -215,6 +233,8 @@ namespace CardGameServer.WebsocketInternal
             if (p1D > p2D) w = 1;
             else if (p1D < p2D) w = 2;
             else w = 3;
+            p1.lockedIn = false;
+            p2.lockedIn = false;
             GameRound gameRound = new GameRound {player1 = p1, player2 = p2, player1Damnage = p1D, player2Damage = p2D, winner = w};
             return gameRound;
         }
