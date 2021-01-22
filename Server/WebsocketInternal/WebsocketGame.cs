@@ -14,7 +14,7 @@ namespace CardGameServer.WebsocketInternal
         
         private string _code;
         private Game _game;
-        public WebsocketGame() : this("DebugGame", new Game()) {  }
+        public WebsocketGame() : this("000000", new Game()) {  }
         public WebsocketGame(string code, Game game)
         {
             _code = code;
@@ -49,6 +49,7 @@ namespace CardGameServer.WebsocketInternal
         protected override void OnMessage(MessageEventArgs e)
         {
             ProperMessage recmsg = JsonConvert.DeserializeObject<ProperMessage>(e.Data);
+            Console.WriteLine($"Message received: {e.Data}");
 
             if (recmsg.messageType == MessageType.Join)
             {
