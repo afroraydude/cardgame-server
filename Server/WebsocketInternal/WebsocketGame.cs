@@ -66,8 +66,8 @@ namespace CardGameServer.WebsocketInternal
                     ProperMessage response = new ProperMessage
                         {messageType = MessageType.JoinAccept, messageData = _code};
                     Send(JsonConvert.SerializeObject(response));
-                    response = new ProperMessage { messageType = MessageType.OpponentInfo, messageData = JsonConvert.SerializeObject(_players[0])};
-                    Send(JsonConvert.SerializeObject(response));
+                    //response = new ProperMessage { messageType = MessageType.OpponentInfo, messageData = JsonConvert.SerializeObject(_players[0])};
+                    //Send(JsonConvert.SerializeObject(response));
                     if (_players.Count == 2)
                     {
                         response = new ProperMessage { messageType = MessageType.OpponentInfo, messageData = JsonConvert.SerializeObject(player)};
