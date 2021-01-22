@@ -64,21 +64,24 @@ namespace CardGameServer.WebsocketInternal
                     Console.WriteLine(_game.getPlayers().Count);
                     Console.WriteLine(JsonConvert.SerializeObject(_game.getPlayers()));
                     ProperMessage response = new ProperMessage
-                        {messageType = MessageType.JoinAccept, messageData = _code};
-                    Send(JsonConvert.SerializeObject(response));
+                    {
+                        messageType = MessageType.JoinAccept, 
+                        messageData = JsonConvert.SerializeObject(player)
+                    };
+                    SendTest(JsonConvert.SerializeObject(response));
                     //response = new ProperMessage { messageType = MessageType.OpponentInfo, messageData = JsonConvert.SerializeObject(_players[0])};
                     //Send(JsonConvert.SerializeObject(response));
                     if (_players.Count == 2)
                     {
-                        response = new ProperMessage { messageType = MessageType.OpponentInfo, messageData = JsonConvert.SerializeObject(player)};
-                        Sessions.SendTo(JsonConvert.SerializeObject(response), _players[0].sessionId);
+                        //response = new ProperMessage { messageType = MessageType.OpponentInfo, messageData = JsonConvert.SerializeObject(player)};
+                        //Sessions.SendTo(JsonConvert.SerializeObject(response), _players[0].sessionId);
                     }
                 }
                 else
                 {
                     ProperMessage response = new ProperMessage
                         {messageType = MessageType.JoinDeny, messageData = null};
-                    Send(JsonConvert.SerializeObject(response));
+                    SendTest(JsonConvert.SerializeObject(response));
                 }
             }
 
@@ -96,14 +99,14 @@ namespace CardGameServer.WebsocketInternal
                     Console.WriteLine("Accepted Player Move");
                     Console.WriteLine($"Data: {e.Data}");
                     ProperMessage response = new ProperMessage { messageType = MessageType.RoundPlayAccept, messageData = null};
-                    Send(JsonConvert.SerializeObject(response));
+                    SendTest(JsonConvert.SerializeObject(response));
                 }
                 else
                 {
                     Console.WriteLine("Denied Player Move");
                     Console.WriteLine($"Data: {e.Data}");
                     ProperMessage response = new ProperMessage { messageType = MessageType.RoundPlayDeny, messageData = null};
-                    Send(JsonConvert.SerializeObject(response));
+                    SendTest(JsonConvert.SerializeObject(response));
                 }
                 
                 if (_players.Count == 2 && (_players[0].lockedIn && _players[1].lockedIn))
@@ -112,8 +115,7 @@ namespace CardGameServer.WebsocketInternal
                     Console.WriteLine(JsonConvert.SerializeObject(gameRound));
                     ProperMessage response = new ProperMessage
                         {messageType = MessageType.RoundResult, messageData = JsonConvert.SerializeObject(gameRound)};
-                    Sessions.SendTo(JsonConvert.SerializeObject(response), _players[0].sessionId);
-                    Sessions.SendTo(JsonConvert.SerializeObject(response), _players[1].sessionId);
+                    Sessions.Broadcast(JsonConvert.SerializeObject(response));
                     ResetRound();
                 }
             }
@@ -227,6 +229,12 @@ namespace CardGameServer.WebsocketInternal
             _game.ResetPlayers();
             _game.AddPlayer(player1);
             _game.AddPlayer(player2);
+        }
+
+        private void SendTest(string toSend)
+        {
+            Console.WriteLine(toSend);
+            Send(toSend);
         }
     }
 }
