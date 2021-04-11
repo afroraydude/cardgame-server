@@ -152,7 +152,7 @@ namespace CardGameServer.WebsocketInternal
                     {
                        ActionType prevActionType = player.actions[i - 1];
                        if (actionType == ActionType.HeavySwordS &&
-                           prevActionType != (int) ActionType.HeavySwordH)
+                           prevActionType != ActionType.HeavySwordH)
                        {
                            return false;
                        }
@@ -162,7 +162,7 @@ namespace CardGameServer.WebsocketInternal
                     if (i < 4)
                     {
                         ActionType nextActionType = player.actions[i + 1];
-                        if (actionType == (int) ActionType.HeavySwordH &&
+                        if (actionType == ActionType.HeavySwordH &&
                             nextActionType != ActionType.HeavySwordS)
                         {
                             return false;
