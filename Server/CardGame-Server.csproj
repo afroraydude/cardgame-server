@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>CardGame_Server</RootNamespace>
+        <LangVersion>8</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
